@@ -38,16 +38,16 @@ export const authenticateToken = async (
       return;
     }
 
-    // Verify user still exists and is active
+    // Verify user still exists
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
-      select: { id: true, is_active: true }
+      select: { id: true }
     });
 
-    if (!user || !user.is_active) {
+    if (!user) {
       res.status(401).json({
         success: false,
-        message: 'User account is inactive or does not exist',
+        message: 'User account does not exist',
         error: 'Invalid user'
       });
       return;

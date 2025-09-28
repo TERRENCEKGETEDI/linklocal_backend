@@ -127,15 +127,6 @@ router.post('/login', async (req: Request, res: Response) => {
       });
     }
 
-    // Check if user is active
-    if (!user.is_active) {
-      return res.status(401).json({
-        success: false,
-        message: 'Account is deactivated',
-        error: 'Account inactive'
-      });
-    }
-
     // Generate tokens
     const tokenPair = AuthUtils.generateTokenPair(user);
 
@@ -204,15 +195,14 @@ router.post('/refresh', async (req: Request, res: Response) => {
         location: true,
         rating: true,
         is_verified: true,
-        is_active: true,
         created_at: true,
       }
     });
 
-    if (!user || !user.is_active) {
+    if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'User not found or inactive',
+        message: 'User not found',
         error: 'Invalid user'
       });
     }
