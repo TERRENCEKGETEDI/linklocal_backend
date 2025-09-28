@@ -1,0 +1,160 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  password      String
+  role          Role
+  phone         String?
+  location      String?
+  avatar_url    String?
+  rating        Float    @default(0)
+  is_verified   Boolean  @default(false)
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  // Relations
+  services           Service[]
+  customer_requests  ServiceRequest[] @relation("customer_requests")
+  provider_requests  ServiceRequest[] @relation("provider_requests")
+  customer_feedback  Feedback[]       @relation("customer_feedback")
+  provider_feedback  Feedback[]       @relation("provider_feedback")
+  notifications      Notification[]
+
+  @@map("users")
+}
+
+model ServiceCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  icon        String
+  color       String
+  description String?
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  // Relations
+  services    Service[]
+
+  @@map("service_categories")
+}
+
+model Service {
+  id            String   @id @default(cuid())
+  title         String
+  description   String
+  category_id   String
+  provider_id   String
+  location      String
+  price         Float
+  price_type    PriceType
+  images        String[] // JSON array of image URLs
+  rating        Float    @default(0)
+  review_count  Int      @default(0)
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  // Relations
+  category      ServiceCategory @relation(fields: [category_id], references: [id])
+  provider      User            @relation(fields: [provider_id], references: [id])
+  requests      ServiceRequest[]
+
+  @@map("services")
+}
+
+model ServiceRequest {
+  id                  String           @id @default(cuid())
+  service_id          String
+  customer_id         String
+  provider_id         String
+  status              RequestStatus
+  message             String?
+  requested_date      DateTime?
+  estimated_duration  Int?
+  created_at          DateTime         @default(now())
+  updated_at          DateTime         @updatedAt
+
+  // Relations
+  service             Service          @relation(fields: [service_id], references: [id])
+  customer            User             @relation("customer_requests", fields: [customer_id], references: [id])
+  provider            User             @relation("provider_requests", fields: [provider_id], references: [id])
+  feedback            Feedback?
+
+  @@map("service_requests")
+}
+
+model Feedback {
+  id                  String   @id @default(cuid())
+  service_request_id  String   @unique
+  customer_id         String
+  provider_id         String
+  rating              Int
+  comment             String?
+  is_public           Boolean  @default(true)
+  created_at          DateTime @default(now())
+
+  // Relations
+  service_request     ServiceRequest @relation(fields: [service_request_id], references: [id])
+  customer            User           @relation("customer_feedback", fields: [customer_id], references: [id])
+  provider            User           @relation("provider_feedback", fields: [provider_id], references: [id])
+
+  @@map("feedback")
+}
+
+model Notification {
+  id         String           @id @default(cuid())
+  user_id    String
+  type       NotificationType
+  title      String
+  message    String
+  data       String? // JSON string for additional data
+  is_read    Boolean          @default(false)
+  created_at DateTime         @default(now())
+
+  // Relations
+  user       User             @relation(fields: [user_id], references: [id])
+
+  @@map("notifications")
+}
+
+enum Role {
+  customer
+  provider
+}
+
+enum PriceType {
+  hourly
+  fixed
+  negotiable
+}
+
+enum RequestStatus {
+  pending
+  accepted
+  declined
+  completed
+  cancelled
+}
+
+enum NotificationType {
+  request
+  acceptance
+  decline
+  completion
+  feedback
+  system
+}
