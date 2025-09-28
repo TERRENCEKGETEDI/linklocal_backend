@@ -7,8 +7,8 @@ export const config = {
     url: process.env.DATABASE_URL!,
   },
   jwt: {
-    secret: process.env.JWT_SECRET!,
-    refreshSecret: process.env.JWT_REFRESH_SECRET!,
+    secret: process.env.JWT_SECRET_KEY!,
+    refreshSecret: process.env.JWT_SECRET_KEY!, // Using same key for refresh
   },
   server: {
     port: parseInt(process.env.PORT || '3001', 10),
@@ -22,8 +22,7 @@ export const config = {
 // Validate required environment variables
 const requiredEnvVars = [
   'DATABASE_URL',
-  'JWT_SECRET',
-  'JWT_REFRESH_SECRET',
+  'JWT_SECRET_KEY',
 ];
 
 for (const envVar of requiredEnvVars) {
