@@ -15,7 +15,7 @@ export const config = {
     nodeEnv: process.env.NODE_ENV || 'development',
   },
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origin: process.env.CORS_ORIGIN || ['http://localhost:5173', 'http://10.153.100.211:8082'],
   },
 };
 
